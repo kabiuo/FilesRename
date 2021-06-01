@@ -15,15 +15,35 @@ public class FilesRename {
     public static int viewHeight = getDisplayMode().getHeight() / 2;
     public static String filePath = "";
 
+    /*
+     * 判断当前运行的系统环境
+     *
+     * */
+    public static boolean isWindows() {
+        return System.getProperty("os.name").toUpperCase().indexOf("WINDOWS") >= 0 ? true : false;
+    }
+
     public static void reNames(JTextField inputFilesNewNameText, JTextArea jTextArea) {
         int count = 1;
+        String oldFileName = "";
+        String newFileName = "";
         jTextArea.setText("");
         File[] oldFiles = new File(filePath).listFiles();
         for (File f : oldFiles) {
-            String oldFileName = filePath + "\\\\" + f.getName();
+            if (isWindows()){
+                oldFileName = filePath + "\\\\" + f.getName();
+            }else {
+                oldFileName = filePath + "/" + f.getName();
+            }
+
             String fileTyle = f.getName().substring(f.getName().lastIndexOf("."), f.getName().length());
             File oldFile = new File(oldFileName);
-            String newFileName = filePath + "\\\\" + inputFilesNewNameText.getText() + "第" + count + "页" + fileTyle;
+            if (isWindows()){
+                newFileName = filePath + "\\\\" + inputFilesNewNameText.getText() + "第" + count + "页" + fileTyle;
+            }else {
+                newFileName = filePath + "/" + inputFilesNewNameText.getText() + "第" + count + "页" + fileTyle;
+            }
+
             File newFile = new File(newFileName);
             if (oldFile.exists() && oldFile.isFile()) {
                 oldFile.renameTo(newFile);
@@ -89,11 +109,12 @@ public class FilesRename {
             //这个就是你选择的文件夹的路径
             filePath = fileChooser.getSelectedFile().getAbsolutePath();
             jTextField.setText(filePath);
-            if (filePath.contains("\\")) {
+            if (filePath.contains("\\") && isWindows()) {
                 filePath = filePath.replace("\\", "\\\\");
-            }
-            if (filePath != null & filePath != "") {
-                findFileList(filePath, jTextArea);
+            } else {
+                if (filePath != null & filePath != "") {
+                    findFileList(filePath, jTextArea);
+                }
             }
         }
     }
@@ -116,7 +137,12 @@ public class FilesRename {
                         if (f.isDirectory()) {
                             findFileList(f.getAbsolutePath(), jTextArea);
                         } else if (f.isFile()) {
-                            jTextArea.append(filePath + "\\\\" + f.getName() + "\r\n");
+                            if (isWindows()){
+                                jTextArea.append(filePath + "\\\\" + f.getName() + "\r\n");
+                            } else {
+                                jTextArea.append(filePath + "/" + f.getName() + "\r\n");
+                            }
+
                         } else {
                             System.out.println("未知错误！");
                         }
